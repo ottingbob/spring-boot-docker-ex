@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  nginx:
+    container_name: nginx
+    image: nginx:1.13
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    ports:
+      - 80:80
+      - 443:443
+    restart: always
+    depends_on:
+      - app-web-full
+
+  app-mysql:
+    container_name: app-mysql
+    image: mysql:5.7
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: test
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: r00typ00ty
+      MYSQL_USER: testuser
+      MYSQL_PASSWORD: testuser
+    ports:
+      - "3306:3306"
+    restart: always
+  
+  app-web-full:
+    container_name: app-web-full
+    build: .
+    volumes:
+      - .:/app
+    working_dir: /app
+    ports:
+      - 8080:80
+    command: mvn clean spring-boot:run
+    depends_on:
+      - app-mysql
